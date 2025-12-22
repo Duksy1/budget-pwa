@@ -80,20 +80,32 @@
     .grid{
       display:grid;
       grid-template-columns: 1.1fr .9fr;
-      gap:14px;
+      gap:20px;
     }
     @media (max-width: 920px){
-      .grid{grid-template-columns: 1fr;}
+      .grid{
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
       .brand{min-width:0}
+      /* Na tabletu/mobileu: Dodaj transakciju prvo */
+      .grid > section:first-child { order: 1; }
+      .grid > section:last-child { order: 2; }
     }
     @media (max-width: 600px){
       :root{
-        --pad: 12px;
-        --r: 14px;
+        --pad: 16px;
+        --r: 16px;
+      }
+      main{
+        padding: 20px var(--pad);
+      }
+      .grid{
+        gap: 20px;
       }
       .top{
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 12px;
       }
       .brand{
         flex: 1 1 100%;
@@ -110,11 +122,15 @@
       .card .hd{
         flex-direction: column;
         align-items: stretch;
-        gap: 12px;
+        gap: 14px;
+        padding: 16px;
       }
       .card .hd .filters{
         min-width: 0 !important;
         width: 100%;
+      }
+      .card .bd{
+        padding: 18px 16px;
       }
     }
     .card{
@@ -125,27 +141,31 @@
       overflow:hidden;
     }
     .card .hd{
-      padding: 14px 14px 10px 14px;
-      display:flex; align-items:flex-end; justify-content:space-between; gap:10px;
+      padding: 18px 18px 14px 18px;
+      display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
       border-bottom: 1px solid var(--line);
       background: linear-gradient(to bottom, rgba(255,255,255,.02), transparent);
     }
     .card .hd h2{
       margin:0;
-      font-size: 14px;
+      font-size: 15px;
       letter-spacing:.2px;
+      font-weight: 600;
     }
-    .card .bd{padding:14px}
-    .row{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
-    @media (max-width: 520px){ .row{grid-template-columns:1fr} }
-    label{display:block; font-size:12px; color:var(--muted); margin: 0 0 6px}
+    .card .bd{padding: 20px 18px}
+    .row{display:grid; grid-template-columns: 1fr 1fr; gap:14px}
+    .row + .row{margin-top: 14px}
+    @media (max-width: 520px){ 
+      .row{grid-template-columns:1fr; gap: 16px} 
+    }
+    label{display:block; font-size:13px; color:var(--muted); margin: 0 0 8px; font-weight: 500}
     input, select, button, textarea{
       width:100%;
       border-radius: 14px;
       border: 1px solid rgba(148,163,184,.20);
       background: rgba(11,15,23,.55);
       color: var(--text);
-      padding: 12px 12px;
+      padding: 14px 14px;
       outline:none;
       font-size:16px; /* Prevents iOS zoom on focus */
       -webkit-appearance: none;
@@ -162,10 +182,11 @@
       border-color: rgba(96,165,250,.65);
       box-shadow: 0 0 0 4px rgba(96,165,250,.12);
     }
-    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    .actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:16px}
     @media (max-width: 520px){
       .actions{
         flex-direction: column;
+        gap: 10px;
       }
       .actions .btn{
         width: 100%;
@@ -202,12 +223,16 @@
     .summary{
       display:grid;
       grid-template-columns: repeat(3, 1fr);
-      gap:10px;
+      gap:12px;
     }
     @media (max-width: 520px){ 
-      .summary{grid-template-columns: 1fr}
+      .summary{
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
       .filters{
         flex-direction: column;
+        gap: 12px;
       }
       .filters > *{
         width: 100%;
@@ -222,21 +247,21 @@
       }
     }
     .kpi{
-      padding:12px;
+      padding: 16px;
       border-radius: 16px;
       border: 1px solid var(--line);
       background: rgba(11,15,23,.45);
     }
-    .kpi .t{font-size:12px; color:var(--muted)}
-    .kpi .v{font-size:18px; font-family:var(--mono); margin-top:6px}
+    .kpi .t{font-size:13px; color:var(--muted); font-weight: 500}
+    .kpi .v{font-size: 20px; font-family:var(--mono); margin-top: 8px; font-weight: 600}
     .kpi.good .v{color: rgba(34,197,94,.95)}
     .kpi.bad .v{color: rgba(239,68,68,.95)}
 
     .filters{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center;
     }
     .filters > *{flex:1}
-    .filters .inlineGroup{display:flex; gap:10px; align-items:center}
+    .filters .inlineGroup{display:flex; gap:12px; align-items:center}
     .filters .inlineGroup .btn{flex:0 0 auto}
 
     table{
@@ -266,14 +291,16 @@
     .note{color:var(--muted); font-size:12px; margin-top:4px; line-height:1.35}
 
     .empty{
-      padding: 18px;
+      padding: 20px;
       border: 1px dashed rgba(148,163,184,.25);
       border-radius: 16px;
       color: var(--muted);
       background: rgba(11,15,23,.35);
+      margin-top: 20px;
     }
     .empty .actions{
       flex-wrap: wrap;
+      margin-top: 14px;
     }
     @media (max-width: 520px){
       .empty .actions .btn,
@@ -305,14 +332,14 @@
       }
       tr{
         border: 1px solid var(--line);
-        border-radius: 12px;
-        margin-bottom: 10px;
-        padding: 12px;
+        border-radius: 14px;
+        margin-bottom: 14px;
+        padding: 16px;
         background: rgba(11,15,23,.35);
       }
       td{
         border: none;
-        padding: 6px 0;
+        padding: 8px 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -413,7 +440,7 @@
           </div>
         </div>
 
-        <div class="row" style="margin-top:10px">
+        <div class="row">
           <div>
             <label for="amount">Iznos</label>
             <input id="amount" inputmode="decimal" placeholder="npr. 12.50" />
@@ -424,9 +451,11 @@
           </div>
         </div>
 
-        <div style="margin-top:10px">
-          <label for="note">Napomena (opcionalno)</label>
-          <textarea id="note" placeholder="npr. kava + sendvič"></textarea>
+        <div class="row" style="grid-template-columns: 1fr">
+          <div>
+            <label for="note">Napomena (opcionalno)</label>
+            <textarea id="note" placeholder="npr. kava + sendvič"></textarea>
+          </div>
         </div>
 
         <div class="actions">
@@ -434,7 +463,7 @@
           <button class="btn small ghost" id="resetBtn" type="button">Reset forme</button>
         </div>
 
-        <div style="margin-top:14px" class="empty">
+        <div class="empty">
           <div style="font-weight:700; margin-bottom:6px">Backup / prijenos na drugi uređaj</div>
           <div class="muted" style="margin-bottom:10px">
             Export spremi kao <span class="mono">.json</span>, pa import na mob/komp.
@@ -477,14 +506,14 @@
           </div>
         </div>
 
-        <div style="margin-top:12px" class="filters">
+        <div class="filters" style="margin-top:16px">
           <input id="search" placeholder="Search: kategorija, napomena…" />
           <div class="inlineGroup">
             <button class="btn small danger inline" id="clearBtn" type="button">Obriši sve</button>
           </div>
         </div>
 
-        <div style="margin-top:12px; overflow:auto; border-radius: 16px; border:1px solid rgba(148,163,184,.14)">
+        <div style="margin-top:16px; overflow:auto; border-radius: 16px; border:1px solid rgba(148,163,184,.14)">
           <table>
             <thead>
               <tr>
@@ -499,11 +528,11 @@
           </table>
         </div>
 
-        <div id="emptyState" class="empty" style="margin-top:12px; display:none">
+        <div id="emptyState" class="empty" style="display:none">
           Nema transakcija za odabrane filtere.
         </div>
 
-        <div class="muted" style="margin-top:10px; font-size:12px">
+        <div class="muted" style="margin-top:16px; font-size:13px">
           Tip: ovo sprema u <span class="mono">localStorage</span>. Za sync između uređaja kasnije možemo dodati backend (npr. Supabase).
         </div>
       </div>
