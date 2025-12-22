@@ -395,6 +395,149 @@
     .muted{color:var(--muted)}
     .right{text-align:right}
     .nowrap{white-space:nowrap}
+
+    /* Charts & Stats */
+    .stats-grid{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    @media (max-width: 700px){
+      .stats-grid{
+        grid-template-columns: 1fr;
+      }
+    }
+    .chart-box{
+      background: rgba(11,15,23,.45);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .chart-box h3{
+      margin: 0 0 16px 0;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .pie-container{
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .pie-chart{
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .pie-legend{
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      min-width: 120px;
+    }
+    .pie-legend-item{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .pie-legend-dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .pie-legend-label{
+      flex: 1;
+      color: var(--muted);
+    }
+    .pie-legend-value{
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+    .line-chart{
+      width: 100%;
+      height: 160px;
+    }
+    .weekly-limit{
+      background: rgba(11,15,23,.45);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .weekly-limit h3{
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .limit-header{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .limit-input-group{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .limit-input-group input{
+      width: 100px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+    .limit-input-group .btn{
+      min-height: 40px;
+      padding: 8px 14px;
+    }
+    .progress-container{
+      background: rgba(148,163,184,.12);
+      border-radius: 12px;
+      height: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-bar{
+      height: 100%;
+      border-radius: 12px;
+      transition: width 0.4s ease, background 0.3s ease;
+      background: linear-gradient(90deg, var(--good), #4ade80);
+    }
+    .progress-bar.warning{
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+    .progress-bar.danger{
+      background: linear-gradient(90deg, var(--bad), #f87171);
+    }
+    .progress-text{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--mono);
+      color: var(--text);
+      text-shadow: 0 1px 2px rgba(0,0,0,.5);
+    }
+    .limit-stats{
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    .limit-stats .spent{color: var(--bad)}
+    .limit-stats .remaining{color: var(--good)}
+    .limit-stats .remaining.over{color: var(--bad)}
   </style>
 </head>
 
@@ -494,6 +637,7 @@
         <h2>Pregled</h2>
         <div class="filters" style="min-width: 340px;">
           <select id="monthFilter" title="Mjesec"></select>
+          <select id="dayFilter" title="Dan"></select>
           <select id="catFilter" title="Kategorija"></select>
         </div>
       </div>
@@ -542,6 +686,44 @@
         <div class="muted" style="margin-top:16px; font-size:13px">
           Tip: ovo sprema u <span class="mono">localStorage</span>. Za sync između uređaja kasnije možemo dodati backend (npr. Supabase).
         </div>
+
+        <!-- Weekly Limit Progress Bar -->
+        <div class="weekly-limit">
+          <h3>📊 Tjedni limit potrošnje</h3>
+          <div class="limit-header">
+            <div class="limit-input-group">
+              <input type="number" id="weeklyLimitInput" placeholder="Limit €" inputmode="decimal" />
+              <button class="btn small primary" id="setLimitBtn">Postavi</button>
+            </div>
+            <div class="muted" style="font-size:12px">
+              Ovaj tjedan: <span id="weekRange" class="mono"></span>
+            </div>
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+            <div class="progress-text" id="progressText">0%</div>
+          </div>
+          <div class="limit-stats">
+            <div>Potrošeno: <span class="spent mono" id="weeklySpent">€0.00</span></div>
+            <div>Preostalo: <span class="remaining mono" id="weeklyRemaining">€0.00</span></div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="stats-grid">
+          <div class="chart-box">
+            <h3>🥧 Raspodjela troškova po kategorijama</h3>
+            <div class="pie-container">
+              <div class="pie-chart" id="pieChart"></div>
+              <div class="pie-legend" id="pieLegend"></div>
+            </div>
+          </div>
+          <div class="chart-box">
+            <h3>📈 Trošenje kroz vrijeme (zadnjih 14 dana)</h3>
+            <svg class="line-chart" id="lineChart" viewBox="0 0 400 160" preserveAspectRatio="xMidYMid meet"></svg>
+          </div>
+        </div>
+
       </div>
     </section>
   </div>
@@ -576,6 +758,7 @@
     importFile: document.getElementById("importFile"),
     csvBtn: document.getElementById("csvBtn"),
     monthFilter: document.getElementById("monthFilter"),
+    dayFilter: document.getElementById("dayFilter"),
     catFilter: document.getElementById("catFilter"),
     search: document.getElementById("search"),
     clearBtn: document.getElementById("clearBtn"),
@@ -587,6 +770,17 @@
     toast: document.getElementById("toast"),
     statusDot: document.getElementById("statusDot"),
     statusText: document.getElementById("statusText"),
+    // Charts & Limit
+    weeklyLimitInput: document.getElementById("weeklyLimitInput"),
+    setLimitBtn: document.getElementById("setLimitBtn"),
+    weekRange: document.getElementById("weekRange"),
+    progressBar: document.getElementById("progressBar"),
+    progressText: document.getElementById("progressText"),
+    weeklySpent: document.getElementById("weeklySpent"),
+    weeklyRemaining: document.getElementById("weeklyRemaining"),
+    pieChart: document.getElementById("pieChart"),
+    pieLegend: document.getElementById("pieLegend"),
+    lineChart: document.getElementById("lineChart"),
   };
 
   const EUR = new Intl.NumberFormat("hr-HR", { style: "currency", currency: "EUR" });
@@ -649,8 +843,51 @@
     set.add(yyyyMm(new Date().toISOString().slice(0,10)));
 
     const months = Array.from(set).sort((a,b) => b.localeCompare(a));
+    const currentValue = els.monthFilter.value;
     els.monthFilter.innerHTML = [`<option value="all">Svi mjeseci</option>`]
       .concat(months.map(m => `<option value="${m}">${m}</option>`)).join("");
+    
+    // Restore previous selection if still valid
+    if(currentValue && months.includes(currentValue)){
+      els.monthFilter.value = currentValue;
+    }
+    
+    initDays();
+  }
+
+  function initDays(){
+    const selectedMonth = els.monthFilter.value;
+    
+    if(selectedMonth === "all"){
+      // Show all unique days from all transactions
+      const allDays = new Set(items.map(it => it.date).filter(Boolean));
+      allDays.add(new Date().toISOString().slice(0,10));
+      const days = Array.from(allDays).sort((a,b) => b.localeCompare(a));
+      
+      els.dayFilter.innerHTML = [`<option value="all">Svi dani</option>`]
+        .concat(days.slice(0, 31).map(d => `<option value="${d}">${d}</option>`)).join("");
+    } else {
+      // Show days only for selected month
+      const daysInMonth = items
+        .filter(it => yyyyMm(it.date) === selectedMonth)
+        .map(it => it.date);
+      
+      // Add today if it's in the selected month
+      const today = new Date().toISOString().slice(0,10);
+      if(yyyyMm(today) === selectedMonth){
+        daysInMonth.push(today);
+      }
+      
+      const uniqueDays = Array.from(new Set(daysInMonth)).sort((a,b) => b.localeCompare(a));
+      
+      els.dayFilter.innerHTML = [`<option value="all">Svi dani</option>`]
+        .concat(uniqueDays.map(d => {
+          const dayNum = d.split('-')[2];
+          return `<option value="${d}">${dayNum}.</option>`;
+        })).join("");
+    }
+    
+    els.dayFilter.value = "all";
   }
 
   function resetForm(){
@@ -708,18 +945,26 @@
   });
 
   // ---------- Filters ----------
-  [els.monthFilter, els.catFilter, els.search].forEach(el => {
+  [els.monthFilter, els.dayFilter, els.catFilter, els.search].forEach(el => {
     el.addEventListener("input", render);
     el.addEventListener("change", render);
   });
 
+  // Update days when month changes
+  els.monthFilter.addEventListener("change", () => {
+    initDays();
+    render();
+  });
+
   function filteredItems(){
     const m = els.monthFilter.value;
+    const d = els.dayFilter.value;
     const c = els.catFilter.value;
     const q = els.search.value.trim().toLowerCase();
 
     return items.filter(it => {
       if(m !== "all" && yyyyMm(it.date) !== m) return false;
+      if(d !== "all" && it.date !== d) return false;
       if(c !== "all" && it.category !== c) return false;
       if(q){
         const hay = (it.category + " " + (it.note||"") + " " + it.type).toLowerCase();
@@ -802,8 +1047,6 @@
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
     }[m]));
   }
-
-  render();
 
   // ---------- Export / Import ----------
   function download(filename, text, mime="application/json"){
@@ -889,6 +1132,248 @@
     render();
     toast("Obrisano sve");
   });
+
+  // ---------- Weekly Limit ----------
+  const LIMIT_KEY = "budget_weekly_limit";
+  
+  function loadLimit(){
+    try{
+      return Number(localStorage.getItem(LIMIT_KEY)) || 0;
+    }catch(e){ return 0; }
+  }
+  
+  function saveLimit(val){
+    localStorage.setItem(LIMIT_KEY, String(val));
+  }
+  
+  let weeklyLimit = loadLimit();
+  els.weeklyLimitInput.value = weeklyLimit || "";
+  
+  function getWeekBounds(){
+    const now = new Date();
+    const day = now.getDay();
+    const diff = day === 0 ? 6 : day - 1; // Monday as start
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - diff);
+    monday.setHours(0,0,0,0);
+    
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    
+    return { 
+      start: monday.toISOString().slice(0,10), 
+      end: sunday.toISOString().slice(0,10),
+      startDate: monday,
+      endDate: sunday
+    };
+  }
+  
+  function getWeeklyExpenses(){
+    const { start, end } = getWeekBounds();
+    return items
+      .filter(it => it.type === "expense" && it.date >= start && it.date <= end)
+      .reduce((sum, it) => sum + it.amount, 0);
+  }
+  
+  function updateWeeklyLimit(){
+    const { start, end } = getWeekBounds();
+    els.weekRange.textContent = `${start.slice(5)} — ${end.slice(5)}`;
+    
+    const spent = getWeeklyExpenses();
+    els.weeklySpent.textContent = EUR.format(spent);
+    
+    if(weeklyLimit > 0){
+      const remaining = weeklyLimit - spent;
+      const pct = Math.min((spent / weeklyLimit) * 100, 100);
+      
+      els.progressBar.style.width = pct + "%";
+      els.progressText.textContent = pct.toFixed(0) + "%";
+      
+      // Color coding
+      els.progressBar.classList.remove("warning", "danger");
+      if(pct >= 100){
+        els.progressBar.classList.add("danger");
+      } else if(pct >= 80){
+        els.progressBar.classList.add("warning");
+      }
+      
+      els.weeklyRemaining.textContent = EUR.format(remaining);
+      els.weeklyRemaining.classList.toggle("over", remaining < 0);
+    } else {
+      els.progressBar.style.width = "0%";
+      els.progressText.textContent = "Postavi limit";
+      els.weeklyRemaining.textContent = "—";
+    }
+  }
+  
+  els.setLimitBtn.addEventListener("click", () => {
+    const val = parseFloat(els.weeklyLimitInput.value);
+    if(Number.isFinite(val) && val > 0){
+      weeklyLimit = val;
+      saveLimit(weeklyLimit);
+      updateWeeklyLimit();
+      toast("Limit postavljen ✅");
+    } else {
+      toast("Upiši ispravan iznos");
+    }
+  });
+
+  // ---------- Pie Chart ----------
+  const CATEGORY_COLORS = {
+    "Food": "#ef4444",
+    "Coffee": "#f97316",
+    "Transport": "#eab308",
+    "Bills": "#84cc16",
+    "Shopping": "#22c55e",
+    "Subscriptions": "#14b8a6",
+    "Health": "#06b6d4",
+    "Entertainment": "#3b82f6",
+    "Travel": "#8b5cf6",
+    "Gifts": "#d946ef",
+    "Other": "#94a3b8"
+  };
+  
+  function renderPieChart(){
+    // Get expenses by category for current month
+    const currentMonth = els.monthFilter.value;
+    const expenses = items.filter(it => {
+      if(it.type !== "expense") return false;
+      if(currentMonth !== "all" && yyyyMm(it.date) !== currentMonth) return false;
+      return true;
+    });
+    
+    const byCategory = {};
+    let total = 0;
+    for(const it of expenses){
+      byCategory[it.category] = (byCategory[it.category] || 0) + it.amount;
+      total += it.amount;
+    }
+    
+    // Sort by amount
+    const sorted = Object.entries(byCategory).sort((a,b) => b[1] - a[1]);
+    
+    if(sorted.length === 0 || total === 0){
+      els.pieChart.style.background = "rgba(148,163,184,.2)";
+      els.pieChart.innerHTML = '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;color:var(--muted)">Nema podataka</div>';
+      els.pieLegend.innerHTML = "";
+      return;
+    }
+    
+    // Build conic gradient
+    let gradientParts = [];
+    let currentAngle = 0;
+    
+    for(const [cat, amount] of sorted){
+      const pct = (amount / total) * 100;
+      const color = CATEGORY_COLORS[cat] || "#94a3b8";
+      gradientParts.push(`${color} ${currentAngle}deg ${currentAngle + pct * 3.6}deg`);
+      currentAngle += pct * 3.6;
+    }
+    
+    els.pieChart.style.background = `conic-gradient(${gradientParts.join(", ")})`;
+    els.pieChart.innerHTML = "";
+    
+    // Legend
+    els.pieLegend.innerHTML = sorted.slice(0, 6).map(([cat, amount]) => {
+      const pct = ((amount / total) * 100).toFixed(1);
+      const color = CATEGORY_COLORS[cat] || "#94a3b8";
+      return `
+        <div class="pie-legend-item">
+          <div class="pie-legend-dot" style="background:${color}"></div>
+          <div class="pie-legend-label">${cat}</div>
+          <div class="pie-legend-value">${pct}%</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // ---------- Line Chart ----------
+  function renderLineChart(){
+    const svg = els.lineChart;
+    const width = 400;
+    const height = 160;
+    const padding = { top: 20, right: 15, bottom: 30, left: 45 };
+    
+    // Get last 14 days
+    const days = [];
+    const today = new Date();
+    for(let i = 13; i >= 0; i--){
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      days.push(d.toISOString().slice(0,10));
+    }
+    
+    // Sum expenses per day
+    const dailyExpenses = days.map(day => {
+      return items
+        .filter(it => it.type === "expense" && it.date === day)
+        .reduce((sum, it) => sum + it.amount, 0);
+    });
+    
+    const maxVal = Math.max(...dailyExpenses, 10);
+    
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+    
+    // Build path
+    const points = dailyExpenses.map((val, i) => {
+      const x = padding.left + (i / (days.length - 1)) * chartWidth;
+      const y = padding.top + chartHeight - (val / maxVal) * chartHeight;
+      return { x, y, val, day: days[i] };
+    });
+    
+    const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(" ");
+    
+    // Area fill
+    const areaD = pathD + ` L ${points[points.length-1].x} ${padding.top + chartHeight} L ${points[0].x} ${padding.top + chartHeight} Z`;
+    
+    // Grid lines
+    const gridLines = [0, 0.25, 0.5, 0.75, 1].map(pct => {
+      const y = padding.top + chartHeight * (1 - pct);
+      const val = (maxVal * pct).toFixed(0);
+      return `
+        <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="rgba(148,163,184,.15)" stroke-dasharray="3,3"/>
+        <text x="${padding.left - 8}" y="${y + 4}" fill="var(--muted)" font-size="10" text-anchor="end" font-family="var(--mono)">${val}</text>
+      `;
+    }).join("");
+    
+    // X-axis labels (show every 2nd day)
+    const xLabels = points.filter((_, i) => i % 2 === 0).map(p => {
+      const label = p.day.slice(8); // Just day number
+      return `<text x="${p.x}" y="${height - 8}" fill="var(--muted)" font-size="10" text-anchor="middle">${label}.</text>`;
+    }).join("");
+    
+    // Dots
+    const dots = points.map(p => 
+      `<circle cx="${p.x}" cy="${p.y}" r="4" fill="var(--accent)" stroke="var(--bg)" stroke-width="2"/>`
+    ).join("");
+    
+    svg.innerHTML = `
+      ${gridLines}
+      <path d="${areaD}" fill="url(#lineGradient)" opacity="0.3"/>
+      <path d="${pathD}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${dots}
+      ${xLabels}
+      <defs>
+        <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+    `;
+  }
+
+  // ---------- Update Charts on Render ----------
+  const originalRender = render;
+  render = function(){
+    originalRender();
+    updateWeeklyLimit();
+    renderPieChart();
+    renderLineChart();
+  };
+  
+  // Initial render
+  render();
 </script>
 </body>
 </html>
