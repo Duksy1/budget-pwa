@@ -232,7 +232,18 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 16px center;
+      background-color: #1a1a1a;
       padding-right: 40px;
+    }
+    select option{
+      background: #1a1a1a;
+      color: #f0f0f0;
+      padding: 12px;
+    }
+    select option:hover,
+    select option:focus,
+    select option:checked{
+      background: #2a2a2a;
     }
     textarea{min-height:48px; resize:vertical}
     input:focus, select:focus, textarea:focus{
@@ -873,8 +884,6 @@
     kpiExpense: document.getElementById("kpiExpense"),
     kpiNet: document.getElementById("kpiNet"),
     toast: document.getElementById("toast"),
-    statusDot: document.getElementById("statusDot"),
-    statusText: document.getElementById("statusText"),
     // Charts & Limit
     weeklyLimitInput: document.getElementById("weeklyLimitInput"),
     setLimitBtn: document.getElementById("setLimitBtn"),
@@ -917,15 +926,6 @@
     els.toast.classList.add("show");
     setTimeout(() => els.toast.classList.remove("show"), 1300);
   }
-
-  function setOnlineBadge(){
-    const online = navigator.onLine;
-    els.statusDot.classList.toggle("off", !online);
-    els.statusText.textContent = online ? "Online" : "Offline";
-  }
-  window.addEventListener("online", setOnlineBadge);
-  window.addEventListener("offline", setOnlineBadge);
-  setOnlineBadge();
 
   // ---------- Init selects ----------
   function initCategories(){
